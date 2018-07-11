@@ -19,6 +19,6 @@ jobs:
             docker create -v /files --name files1 alpine:3.4 /bin/true
             openssl aes-256-cbc -d -md md5 -in `pwd`/${CLUSTER_NAME}-credentials.pem.enc -out `pwd`/sp-credentials.pem -k ${ENC_KEY}
             docker cp `pwd`/sp-credentials.pem files1:/files
-            docker run --name microsoft/azure-cli --volumes-from files1 navikt/gcloud:1 bash -c "az login --password sp-credentials.pem; kubectl get pods"
+            docker run --name azure-cli --volumes-from files1 microsoft/azure-cli bash -c "az login --password sp-credentials.pem; kubectl get pods"
             docker cp gcloud:/root/.kube/config kubeconfig
 
