@@ -12,14 +12,22 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
-      # generate valid kubeconfig via gcloud cli
+      - run:
+          name: Run naisplater with nais-yaml
+          command: |
+            docker create -v /nais-yaml --name files0 alpine:3.4 /bin/true
+            git clone https://${GH_TOKEN}@github.com/navikt/nais-yaml 2> /dev/null || echo "Failed to clone navikt/nais-yaml"
+            docker cp `pwd`/nais-yaml files0:/
+            docker run --name naisplater --volumes-from files0  navikt/naisplater:${NAISPLATER_VERSION} /bin/bash -c "naisplater ${CLUSTER_NAME} /nais-yaml/templates /nais-yaml/vars /out"
+            docker cp naisplater:/out naisplater-output
+            ls -l naisplater-output
       - run: 
           name: Generate valid kubeconfig via azure-cli
           command: |
-            docker run --name azure-cli microsoft/azure-cli bash -c "az login --service-principal --user ${SP_NAME} --password ${SP_PASS} --tenant ${AZURE_TENANT}; az aks get-credentials --name nais-dev-aks-name --resource-group nais-dev-aks-rg;az acs kubernetes install-cli;"
+            docker run --name azure-cli microsoft/azure-cli bash -c "az login --service-principal --user ${SP_NAME} --password ${SP_PASS} --tenant ${AZURE_TENANT} --query \"[0].user.type\"; az aks get-credentials --name nais-dev-aks-name --resource-group nais-dev-aks-rg;az acs kubernetes install-cli;"
             docker cp azure-cli:/root/.kube/config kubeconfig
       - run:
-          name: List pods
+          name: List pods (test)
           command: |
             docker create -v /root/.kube/ --name files2 alpine:3.4 /bin/true
             docker cp `pwd`/kubeconfig files2:/root/.kube/config
