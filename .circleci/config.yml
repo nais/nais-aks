@@ -19,6 +19,10 @@ jobs:
             docker create -v /files --name files1 alpine:3.4 /bin/true
             openssl aes-256-cbc -d -md md5 -in `pwd`/${CLUSTER_NAME}-credentials.pem.enc -out `pwd`/sp-credentials.pem -k ${ENC_KEY}
             docker cp `pwd`/sp-credentials.pem files1:/files
-            docker run --name azure-cli --volumes-from files1 microsoft/azure-cli bash -c "az login --service-principal --user ${SP_NAME} --password ${SP_PASS} --tenant ${AZURE_TENANT}; az aks get-credentials --name nais-dev-aks-name --resource-group nais-dev-aks-rg; kubectl get pods"
+            docker run --name azure-cli --volumes-from files1 microsoft/azure-cli bash -c "az login --service-principal --user ${SP_NAME} --password ${SP_PASS} --tenant ${AZURE_TENANT}; az aks get-credentials --name nais-dev-aks-name --resource-group nais-dev-aks-rg;"
             docker cp gcloud:/root/.kube/config kubeconfig
-
+      - run:
+          name: List pods
+          command: |
+            docker cp `pwd`/kubeconfig files3:/root/.kube/config
+            docker run --name kubectl --volumes-from files3 lachlanevenson/k8s-kubectl:${KUBECTL_IMAGE_TAG} get pods
