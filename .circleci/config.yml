@@ -3,12 +3,12 @@ jobs:
   build:
     docker:
       - image: circleci/golang:latest
-        environment:
-          NAISPLATER_VERSION: 0.0.0
-          KUBECTL_IMAGE_TAG: v1.10.0
-          NAISCAPER_VERSION: 8.0.0
-          CLUSTER_NAME: nais-dev-aks-name
-          RESOURCE_GROUP: nais-dev-aks-rg
+    environment:
+      NAISPLATER_VERSION: 0.0.0
+      KUBECTL_IMAGE_TAG: v1.10.0
+      NAISCAPER_VERSION: 8.0.0
+      CLUSTER_NAME: nais-dev-aks-name
+      RESOURCE_GROUP: nais-dev-aks-rg
     steps:
       - checkout
       - setup_remote_docker
